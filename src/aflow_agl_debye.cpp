@@ -542,24 +542,38 @@ namespace AGL_functions {
     // string FileLockName = "agl.LOCK";
     // string AflowInName = _AFLOWIN_;
     // string FileLockName = _AFLOWLOCK_;    
-    string AflowInName = "", FileLockName = "";
+    string AflowInName=_AFLOWIN_, FileLockName=_AFLOWLOCK_; //CO20240406
 
-    // string filedirname = aurostd::CleanFileName(directory) + "agl.LOCK";
-    if (aurostd::FileExist(aurostd::CleanFileName(directory) + "agl.LOCK")) {
-      FileLockName = "agl.LOCK";
-    } else if (aurostd::FileExist(aurostd::CleanFileName(directory) + "ael.LOCK")) {
-      FileLockName = "ael.LOCK";
-    } else {
-      FileLockName = _AFLOWLOCK_;
+    //CO20240406 START - fixing for different variants
+    vector<string> vaflowin_variants;
+    aurostd::string2tokens(DEFAULT_FILE_AFLOWIN_VARIANTS_AELAGL,vaflowin_variants,",");
+    for(uint i=0;i<vaflowin_variants.size();i++){
+      if(aurostd::FileExist(aurostd::CleanFileName(directory+"/"+vaflowin_variants[i]))){AflowInName=vaflowin_variants[i];break;}
     }
+    
+    vector<string> vlock_variants;
+    aurostd::string2tokens(DEFAULT_FILE_AFLOWLOCK_VARIANTS_AELAGL,vlock_variants,",");
+    for(uint i=0;i<vlock_variants.size();i++){
+      if(aurostd::FileExist(aurostd::CleanFileName(directory+"/"+vlock_variants[i]))){FileLockName=vlock_variants[i];break;}
+    }
+    //CO20240406 STOP - fixing for different variants
 
-    if (aurostd::FileExist(aurostd::CleanFileName(directory) + _AFLOWIN_AGL_DEFAULT_)) {
-      AflowInName = _AFLOWIN_AGL_DEFAULT_;
-    } else if (aurostd::FileExist(aurostd::CleanFileName(directory) + _AFLOWIN_AEL_DEFAULT_)) {
-      AflowInName = _AFLOWIN_AEL_DEFAULT_;
-    } else {
-      AflowInName = _AFLOWIN_;
-    }
+    //[CO20240406 - OBSOLETE]// string filedirname = aurostd::CleanFileName(directory) + "agl.LOCK";
+    //[CO20240406 - OBSOLETE]if (aurostd::FileExist(aurostd::CleanFileName(directory) + "agl.LOCK")) {
+    //[CO20240406 - OBSOLETE]  FileLockName = "agl.LOCK";
+    //[CO20240406 - OBSOLETE]} else if (aurostd::FileExist(aurostd::CleanFileName(directory) + "ael.LOCK")) {
+    //[CO20240406 - OBSOLETE]  FileLockName = "ael.LOCK";
+    //[CO20240406 - OBSOLETE]} else {
+    //[CO20240406 - OBSOLETE]  FileLockName = _AFLOWLOCK_;
+    //[CO20240406 - OBSOLETE]}
+
+    //[CO20240406 - OBSOLETE]if (aurostd::FileExist(aurostd::CleanFileName(directory) + _AFLOWIN_AGL_DEFAULT_)) {
+    //[CO20240406 - OBSOLETE]  AflowInName = _AFLOWIN_AGL_DEFAULT_;
+    //[CO20240406 - OBSOLETE]} else if (aurostd::FileExist(aurostd::CleanFileName(directory) + _AFLOWIN_AEL_DEFAULT_)) {
+    //[CO20240406 - OBSOLETE]  AflowInName = _AFLOWIN_AEL_DEFAULT_;
+    //[CO20240406 - OBSOLETE]} else {
+    //[CO20240406 - OBSOLETE]  AflowInName = _AFLOWIN_;
+    //[CO20240406 - OBSOLETE]}
 
     // Call AGL_xvasp_flags_populate to populate xvasp, aflags, kflags and vflags classes
     uint aglerror = AGL_functions::AGL_xvasp_flags_populate(xvasp, AflowIn, AflowInName, FileLockName, directory, aflags, kflags, vflags, FileMESSAGE);

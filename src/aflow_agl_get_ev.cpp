@@ -265,7 +265,8 @@ namespace AGL_functions {
     vector<string> vaflowins;
     if(AflowInName.length()>0){vaflowins.push_back(AflowInName);} // Check if AflowInName exists
     if(_AFLOWIN_.length()>0){vaflowins.push_back(_AFLOWIN_);} // Otherwise, check if _AFLOWIN_ file is AGL input file
-    vaflowins.push_back(_AFLOWIN_AGL_DEFAULT_);  // Otherwise, check for other commonly used names for AGL aflow.in file
+    aurostd::string2tokensAdd(DEFAULT_FILE_AFLOWIN_VARIANTS_AELAGL,vaflowins,",");  //CO20240406
+    //[CO20240406 - OBSOLETE]vaflowins.push_back(_AFLOWIN_AGL_DEFAULT_);  // Otherwise, check for other commonly used names for AGL aflow.in file
     for(uint iaf=0;iaf<vaflowins.size()&&!agl_aflowin_found;iaf++){
       aflowinname = vaflowins.at(iaf);
       if(aurostd::EFileExist(directory_LIB+"/"+aflowinname,stmp)&&aurostd::IsCompressed(stmp)){aurostd::UncompressFile(stmp);}  //CO20210204 - fix aflow.in.xz

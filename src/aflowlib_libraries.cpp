@@ -93,7 +93,8 @@ namespace aflowlib {  //CO20210302
     m_initialized=(!m_dir.empty());
 
     vector<string> vaflowins,vLOCKs;
-    aurostd::string2tokens("aflow.in,"+_AFLOWIN_AGL_DEFAULT_+",",vaflowins,",");
+    //[CO20240407 - OBSOLETE]aurostd::string2tokens("aflow.in,"+_AFLOWIN_AGL_DEFAULT_+",",vaflowins,",");
+    aurostd::string2tokens("aflow.in,"+DEFAULT_FILE_AFLOWIN_VARIANTS_AELAGL+",",vaflowins,","); //CO20240407
     return true;
   }
 
