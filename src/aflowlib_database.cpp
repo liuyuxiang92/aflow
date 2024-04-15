@@ -445,6 +445,14 @@ namespace aflowlib {
       }
       message << "Database file " << (copied?"successfully":"not") << " copied.";
       pflow::logger(__AFLOW_FILE__, __AFLOW_FUNC__, message, *p_FileMESSAGE, *p_oss);
+      if(nentries_tmp > nentries_old){
+        message << (nentries_tmp-nentries_old) << " new entries were added to the database." << endl;
+        pflow::logger(__AFLOW_FILE__, __AFLOW_FUNC__, message, *p_FileMESSAGE, *p_oss); //CO20240409
+      }
+      if(ncols_tmp > ncols_old){
+        message << (ncols_tmp-ncols_old) << " new properties were added to the database." << endl;
+        pflow::logger(__AFLOW_FILE__, __AFLOW_FUNC__, message, *p_FileMESSAGE, *p_oss); //CO20240409
+      }
     }
     if (!found_error && !keep) {
       aurostd::RemoveFile(tmp_file);
