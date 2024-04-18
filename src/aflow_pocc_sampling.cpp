@@ -13,10 +13,44 @@
 
 namespace random_sample {
     bool LDEBUG = true;
+    double setPOccSampleRate(const string& pocc_sample_rate_string, int sample_round){//give the warning message if --pocc_sample_rate format is wrong
+        double pocc_sample_rate;
+        stringstream message;
+        //if(pocc_sample_rate_string.empty()){
+        //   message << "No POCC random seed sampling rate is found" << endl;
+        //   throw aurostd::xerror(__AFLOW_FILE__,__AFLOW_FUNC__,message,_INPUT_ILLEGAL_);
+        //}   
+        if(aurostd::substring2bool(pocc_sample_rate_string,",")){
+           message << "Cannot handle more than one pocc_sample_rate specification";
+           throw aurostd::xerror(__AFLOW_FILE__,__AFLOW_FUNC__,message,_INPUT_ILLEGAL_);
+        }   
+ 
+        vector<string> tokens;
+        aurostd::string2tokens(pocc_sample_rate_string,tokens,":");
+        if(tokens.size()<2){
+           message << "No second random seed sampling rate is found" << endl;
+           throw aurostd::xerror(__AFLOW_FILE__,__AFLOW_FUNC__,message,_INPUT_ILLEGAL_);
+        }   
+        else{
+           if(!aurostd::isfloat(tokens[sample_round])){
+             message << "Input is not a float [input=" << tokens[sample_round] << "]";
+             throw aurostd::xerror(__AFLOW_FILE__,__AFLOW_FUNC__,message,_INPUT_ILLEGAL_);
+           }   
+           pocc_sample_rate=aurostd::string2utype<double>(tokens[sample_round]);
+           if(aurostd::isequal(pocc_sample_rate,0.0,_AFLOW_POCC_ZERO_TOL_)){
+             message << "Sample rate is too small (0) [input=" << tokens[sample_round] << "]";
+             throw aurostd::xerror(__AFLOW_FILE__,__AFLOW_FUNC__,message,_INPUT_ILLEGAL_);
+           }   
+           if(std::signbit(pocc_sample_rate)){
+              message << "Sample rate cannot be negative [input=" << tokens[sample_round] << "]";
+              throw aurostd::xerror(__AFLOW_FILE__,__AFLOW_FUNC__,message,_INPUT_ILLEGAL_);
+           }   
+        }  
+        return pocc_sample_rate;
+    }
+
     vector<unsigned long long int> first_random_seed_sampling(unsigned long long int hnf_count, unsigned long long int types_config_permutations_count){
-         vector<string> tokens; // saving for sampling rate
-         aurostd::string2tokens(XHOST.vflag_pflow.getattachedscheme("POCC_SAMPLE_RATE"),tokens,":"); //get first random sampling rate from comments line
-         double sample_rate=aurostd::string2utype<double>(tokens[0]);// save random sampling rate to sample_rate
+         double sample_rate = random_sample::setPOccSampleRate(XHOST.vflag_pflow.getattachedscheme("POCC_SAMPLE_RATE"),0);
          if(LDEBUG){
              cerr << "YL_test: " << "This is first random seed sampling for unique configuration calculations" << endl;
              cerr << "YL_test: " << "Random seed sampling rate is: " << 100*sample_rate << "%" << endl;
@@ -54,9 +88,7 @@ namespace random_sample {
     }
     
     std::list<pocc::POccSuperCellSet> second_random_seed_sampling(std::list<pocc::POccSuperCellSet> l_supercell_sets, unsigned long long int hnf_count){
-        vector<string> tokens;
-        aurostd::string2tokens(XHOST.vflag_pflow.getattachedscheme("POCC_SAMPLE_RATE"),tokens,":");//seperate the sampling rate with column signs
-        double sample_rate=aurostd::string2utype<double>(tokens[1]); // read second random seed sampling rate
+        double sample_rate = random_sample::setPOccSampleRate(XHOST.vflag_pflow.getattachedscheme("POCC_SAMPLE_RATE"),1);
         vector<unsigned long long int> ihnf_unique_supercell_num(hnf_count,0);
         l_supercell_sets.sort();
         for(unsigned long long int i=0;i<l_supercell_sets.size();i++) {
