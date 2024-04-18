@@ -4708,40 +4708,6 @@ namespace pocc {
 
      //YL20240402  for second random_seed sampling
     if(XHOST.vflag_pflow.flag("POCC_SAMPLE_RATE")){
-        //save all unique POSCAR aflow.pocc.structure_all_before_second_sampling.out before second sampling
-        if(DEFAULT_POCC_WRITE_OUT_ALL_SUPERCELLS && !m_aflags.Directory.empty() && !m_p_flags.flag("POCC_SKIP_WRITING_FILES")){
-           message << "Writing out all structures before second sampling";pflow::logger(__AFLOW_FILE__,__AFLOW_FUNC__,message,m_aflags,*p_FileMESSAGE,*p_oss,_LOGGER_MESSAGE_);
-           stringstream all_supercells_ss;
-           string POSCAR_strtag="";
-           pocc::POccSuperCell psc;
-           unsigned long long int isupercell=0;
-           for(std::list<pocc::POccSuperCellSet>::iterator it=l_supercell_sets.begin();it!=l_supercell_sets.end();++it){
-             isupercell=std::distance(l_supercell_sets.begin(),it);
-             if(LDEBUG) {cerr << __AFLOW_FUNC__ << " isupercell=" << isupercell << endl;}
-             const pocc::POccSuperCellSet& pscs=(*it);
-             all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
-             all_supercells_ss << AFLOW_POCC_TAG << "STRUCTURES_GROUP " << isupercell+1 << "/" << l_supercell_sets.size() << endl;
-             all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
-             for(uint i=0;i<pscs.m_psc_set.size();i++){
-               if(LDEBUG) {cerr << __AFLOW_FUNC__ << " i=" << i << endl;}
-               psc=pscs.m_psc_set[i];
-               psc.m_degeneracy=1;
-               POSCAR_strtag=pocc::getARUNString(isupercell,l_supercell_sets.size(),i,pscs.m_psc_set.size(),pscs.m_psc_set[i].m_hnf_index,pscs.m_psc_set[i].m_site_config_index,true);
-               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
-               all_supercells_ss << AFLOW_POCC_TAG << "STRUCTURE " << i+1 << "/" << pscs.m_psc_set.size() << endl;
-               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
-               all_supercells_ss << AFLOW_POCC_TAG << "UFF_ENERGY=" << std::fixed << std::setprecision(15) << psc.m_energy_uff << endl; all_supercells_ss.unsetf(std::ios_base::floatfield);
-               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
-               all_supercells_ss << POSCAR_POCC_series_START_tag << POSCAR_strtag << endl;
-               all_supercells_ss << createXStructure(psc,n_hnf,hnf_count,types_config_permutations_count,true,PRIMITIVIZE); // << endl;
-               if(LDEBUG) {cerr << __AFLOW_FUNC__ << " structure created" << endl;}
-               all_supercells_ss << POSCAR_POCC_series_STOP_tag << POSCAR_strtag << endl;
-               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
-             }   
-           }    
-           aurostd::stringstream2file(all_supercells_ss,pocc::POccCalculator::getOutputPath()+"/"+POCC_FILE_PREFIX+"structure_all_before_second_sampling.out");
-        //save all unique POSCAR aflow.pocc.structure_all_before_second_sampling.out before second sampling
-        }
         total_degeneracy += skip_config_num;//add skipped config number to total_degeneracy for the check of if(total_permutations_count!=total_degeneracy)
         l_supercell_sets =  random_sample::second_random_seed_sampling(l_supercell_sets, hnf_count);//replace the second round random seed sampling config for DFT calculations to original l_supercell_sets all unique configs.
     }
