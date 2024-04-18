@@ -20,9 +20,11 @@
 #include "aflow.h"
 #include "aflow_pocc.h"
 #include "aflow_compare_structure.h"
+#include "aflow_pocc_sampling.h" //YL20240407 for pocc_sampling
 
 #define _DEBUG_POCC_ false  //CO20190116
 #define _DEBUG_POCC_CLUSTER_ANALYSIS_ false && _DEBUG_POCC_  //CO20190116
+
 
 const string POSCAR_START_tag=_VASP_POSCAR_MODE_EXPLICIT_START_; //no-period is important
 const string POSCAR_STOP_tag=_VASP_POSCAR_MODE_EXPLICIT_STOP_; //no-period is important
@@ -4305,6 +4307,7 @@ namespace pocc {
   void POccCalculator::calculate(){
     bool LDEBUG=(FALSE || _DEBUG_POCC_ || XHOST.DEBUG);
     stringstream message;
+    unsigned long long int skip_config_num = 0;//YL20240402 skip_config_num save the total amount of skipped config due to pocc_sampling for the check of if(total_permutations_count!=total_degeneracy)
 
     //starting criteria for HNF matrices
     //xmatrix<double> hnf_mat;                            //really xmatrix of int's, but we rule for int * double in xmatrix, no big deal
@@ -4458,7 +4461,16 @@ namespace pocc {
         // the first number sets the number of threads that are created overall (in this case one thread per CPU)
         pflow::updateProgressBar(0, vpsc.size(), *p_oss);
         xt.run(KBIN::get_NCPUS(m_kflags), fn, vpsc, v_energy_analyzer, vv_types_config, npsc_queue, m_save, m_job);
-        for(size_t i = 0; i < vpsc.size(); i++){add2DerivativeStructuresList(vpsc[i]);}
+        //
+        //YL20240402 for seed sampling for unique structure screening
+        if(XHOST.vflag_pflow.flag("POCC_SAMPLE_RATE")){
+           vector<unsigned long long int> selected_indices = random_sample::first_random_seed_sampling(hnf_count, types_config_permutations_count); //get random seed sampling selected derivitive config indices
+           for(size_t i = 0; i < selected_indices.size(); i++){add2DerivativeStructuresList(vpsc[selected_indices[i]]);}
+           skip_config_num = types_config_permutations_count*hnf_count - selected_indices.size();   // calculate total amout of skipped configs
+        }else{
+           for(size_t i = 0; i < vpsc.size(); i++){add2DerivativeStructuresList(vpsc[i]);}
+        }
+        //YL20240402 for seed sampling for unique structure screening
       }
 
     }else{  //group theory approach
@@ -4694,6 +4706,46 @@ namespace pocc {
       total_degeneracy+=(*it).getDegeneracy();
     }
 
+     //YL20240402  for second random_seed sampling
+    if(XHOST.vflag_pflow.flag("POCC_SAMPLE_RATE")){
+        //save all unique POSCAR aflow.pocc.structure_all_before_second_sampling.out before second sampling
+        if(DEFAULT_POCC_WRITE_OUT_ALL_SUPERCELLS && !m_aflags.Directory.empty() && !m_p_flags.flag("POCC_SKIP_WRITING_FILES")){
+           message << "Writing out all structures before second sampling";pflow::logger(__AFLOW_FILE__,__AFLOW_FUNC__,message,m_aflags,*p_FileMESSAGE,*p_oss,_LOGGER_MESSAGE_);
+           stringstream all_supercells_ss;
+           string POSCAR_strtag="";
+           pocc::POccSuperCell psc;
+           unsigned long long int isupercell=0;
+           for(std::list<pocc::POccSuperCellSet>::iterator it=l_supercell_sets.begin();it!=l_supercell_sets.end();++it){
+             isupercell=std::distance(l_supercell_sets.begin(),it);
+             if(LDEBUG) {cerr << __AFLOW_FUNC__ << " isupercell=" << isupercell << endl;}
+             const pocc::POccSuperCellSet& pscs=(*it);
+             all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
+             all_supercells_ss << AFLOW_POCC_TAG << "STRUCTURES_GROUP " << isupercell+1 << "/" << l_supercell_sets.size() << endl;
+             all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
+             for(uint i=0;i<pscs.m_psc_set.size();i++){
+               if(LDEBUG) {cerr << __AFLOW_FUNC__ << " i=" << i << endl;}
+               psc=pscs.m_psc_set[i];
+               psc.m_degeneracy=1;
+               POSCAR_strtag=pocc::getARUNString(isupercell,l_supercell_sets.size(),i,pscs.m_psc_set.size(),pscs.m_psc_set[i].m_hnf_index,pscs.m_psc_set[i].m_site_config_index,true);
+               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
+               all_supercells_ss << AFLOW_POCC_TAG << "STRUCTURE " << i+1 << "/" << pscs.m_psc_set.size() << endl;
+               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
+               all_supercells_ss << AFLOW_POCC_TAG << "UFF_ENERGY=" << std::fixed << std::setprecision(15) << psc.m_energy_uff << endl; all_supercells_ss.unsetf(std::ios_base::floatfield);
+               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
+               all_supercells_ss << POSCAR_POCC_series_START_tag << POSCAR_strtag << endl;
+               all_supercells_ss << createXStructure(psc,n_hnf,hnf_count,types_config_permutations_count,true,PRIMITIVIZE); // << endl;
+               if(LDEBUG) {cerr << __AFLOW_FUNC__ << " structure created" << endl;}
+               all_supercells_ss << POSCAR_POCC_series_STOP_tag << POSCAR_strtag << endl;
+               all_supercells_ss << AFLOWIN_SEPARATION_LINE << endl;
+             }   
+           }    
+           aurostd::stringstream2file(all_supercells_ss,pocc::POccCalculator::getOutputPath()+"/"+POCC_FILE_PREFIX+"structure_all_before_second_sampling.out");
+        //save all unique POSCAR aflow.pocc.structure_all_before_second_sampling.out before second sampling
+        }
+        total_degeneracy += skip_config_num;//add skipped config number to total_degeneracy for the check of if(total_permutations_count!=total_degeneracy)
+        l_supercell_sets =  random_sample::second_random_seed_sampling(l_supercell_sets, hnf_count);//replace the second round random seed sampling config for DFT calculations to original l_supercell_sets all unique configs.
+    }
+     //YL20240402 for second_random_seed_sampling
     if(total_permutations_count!=total_degeneracy){
       throw aurostd::xerror(__AFLOW_FILE__,__AFLOW_FUNC__,"Unexpected degeneracy count (does not match expected total permutations count)");
     }
