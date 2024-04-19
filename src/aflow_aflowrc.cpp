@@ -523,6 +523,10 @@
 #define         POCC_PHDOSCAR_FILE                                XHOST.adefault.getattachedscheme("POCC_PHDOSCAR_FILE")  //ME20210927
 #define AFLOWRC_POCC_ANIONS_LIST                                  string("B,C,I,N,O")
 #define         POCC_ANIONS_LIST                                  XHOST.adefault.getattachedscheme("POCC_ANIONS_LIST")
+#define AFLOWRC_POCC_ALL_SAMPLED_SUPERCELLS_FILE                  string("_percent_sampled_structures_all.out")  //YL20240419
+#define         POCC_ALL_SAMPLED_SUPERCELLS_FILE                  XHOST.adefault.getattachedscheme("POCC_ALL_SAMPLED_SUPERCELLS_FILE")
+#define AFLOWRC_POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE       string("without_sampled_structures_unique.out")  //YL20240419
+#define         POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE       XHOST.adefault.getattachedscheme("POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE")
 
 // DEFAULT APL
 //// DEFAULT APL SUPERCELL
@@ -1606,6 +1610,8 @@ namespace aflowrc {
     aflowrc::load_default("POCC_DOSCAR_FILE",AFLOWRC_POCC_DOSCAR_FILE);
     aflowrc::load_default("POCC_PHDOSCAR_FILE",AFLOWRC_POCC_PHDOSCAR_FILE);  //ME20210927
     aflowrc::load_default("POCC_ANIONS_LIST",AFLOWRC_POCC_ANIONS_LIST);
+    aflowrc::load_default("POCC_ALL_SAMPLED_SUPERCELLS_FILE",AFLOWRC_POCC_ALL_SAMPLED_SUPERCELLS_FILE);  //YL20240419
+    aflowrc::load_default("POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE",AFLOWRC_POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE);  //YL20240419
 
     // DEFAULT APL
     //// DEFAULT APL SUPERCELL
@@ -2309,6 +2315,8 @@ namespace aflowrc {
     aflowrc << "POCC_DOSCAR_FILE=\"" << AFLOWRC_POCC_DOSCAR_FILE << "\"" << endl;
     aflowrc << "POCC_PHDOSCAR_FILE=\"" << AFLOWRC_POCC_PHDOSCAR_FILE << "\"" << endl;  //ME20210927
     aflowrc << "POCC_ANIONS_LIST=\"" << AFLOWRC_POCC_ANIONS_LIST << "\"" << endl;
+    aflowrc << "POCC_ALL_SAMPLED_SUPERCELLS_FILE=\"" << AFLOWRC_POCC_ALL_SAMPLED_SUPERCELLS_FILE << "\"" << endl;  //YL20240419
+    aflowrc << "POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE=\"" << AFLOWRC_POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE << "\"" << endl;  //YL20240419
 
     aflowrc << " " << endl;
     aflowrc << "// DEFAULTS APL" << endl;
@@ -2978,6 +2986,8 @@ namespace aflowrc {
     if(LDEBUG) oss << "XHOST.adefault.getattachedscheme(\"POCC_DOSCAR_FILE\")=\"" << POCC_DOSCAR_FILE << "\"" << endl;
     if(LDEBUG) oss << "XHOST.adefault.getattachedscheme(\"POCC_PHDOSCAR_FILE\")=\"" << POCC_PHDOSCAR_FILE << "\"" << endl;  // ME20210927
     if(LDEBUG) oss << "XHOST.adefault.getattachedscheme(\"POCC_ANIONS_LIST\")=\"" << POCC_ANIONS_LIST << "\"" << endl;
+    if(LDEBUG) oss << "XHOST.adefault.getattachedscheme(\"POCC_ALL_SAMPLED_SUPERCELLS_FILE\")=\"" << POCC_ALL_SAMPLED_SUPERCELLS_FILE << "\"" << endl;  //YL20240419
+    if(LDEBUG) oss << "XHOST.adefault.getattachedscheme(\"POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE\")=\"" << POCC_WITHOUT_SAMPLED_UNIQUE_SUPERCELLS_FILE << "\"" << endl;  //YL20240419
 
     if(LDEBUG) oss << "// DEFAULTS APL" << endl;
     if(LDEBUG) oss << "XHOST.adefault.getattachedscheme(\"DEFAULT_APL_PREC\")=\"" << DEFAULT_APL_PREC << "\"" << endl;
