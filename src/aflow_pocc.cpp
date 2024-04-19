@@ -4708,7 +4708,7 @@ namespace pocc {
 
      //YL20240402  for second random_seed sampling
     if(XHOST.vflag_pflow.flag("POCC_SAMPLE_RATE")){
-        //YL20240419 save all structures after first round sampling in aflow.pocc."first sample rate"_percent_sampled_structures_all.out.xz
+        //YL20240419 save all structures after first round sampling in aflow.pocc.xxx_percent_sampled_structures_all.out.xz
         if(DEFAULT_POCC_WRITE_OUT_ALL_SUPERCELLS && !m_aflags.Directory.empty() && !m_p_flags.flag("POCC_SKIP_WRITING_FILES")){
            message << "Writing out " << POCC_ALL_SUPERCELLS_FILE << ". Please be patient.";
            pflow::logger(__AFLOW_FILE__,__AFLOW_FUNC__,message,m_aflags,*p_FileMESSAGE,*p_oss,_LOGGER_MESSAGE_);
